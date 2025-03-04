@@ -122,7 +122,9 @@ export const App: React.FC = () => {
         </header>
 
         <TodoList
-          preparedTodos={preparedTodos}
+          preparedTodos={
+            tempTodo ? [tempTodo, ...preparedTodos] : preparedTodos
+          }
           errorMessage={errorMessage}
           onDelete={deleteTodo}
           onSelect={setSelectedTodo}

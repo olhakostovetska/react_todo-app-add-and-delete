@@ -25,26 +25,21 @@ export const TodoForm: React.FC<Props> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (title.trim() === '') {
       onTitleChange(title);
 
       return;
     }
 
-    onSubmit({ title, completed: false, userId: USER_ID });
-
-    setTitle('');
+    onSubmit({ title, completed: false, userId: USER_ID })
+      .then(() => setTitle(''))
+      .catch(() => {});
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
-      if (title.trim() !== '') {
-        onSubmit({ title, completed: false, userId: USER_ID });
-        setTitle('');
-      } else {
-        onTitleChange(title);
-      }
+      handleSubmit(e);
     }
   };
 
