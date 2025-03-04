@@ -18,7 +18,6 @@ export const App: React.FC = () => {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const preparedTodos = getPreparedTodos(todos, filterBy);
   const completedTodos = todos.filter(todo => todo.completed);
   const todoCount = todos.length - completedTodos.length;

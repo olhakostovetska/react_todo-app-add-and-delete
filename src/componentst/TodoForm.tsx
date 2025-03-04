@@ -5,7 +5,7 @@ import { USER_ID } from '../api/todos';
 type Props = {
   todos: Todo[];
   onTitleChange: (title: string) => void;
-  onSubmit: (todo: Omit<Todo, 'id'>) => void;
+  onSubmit: (todo: Omit<Todo, 'id'>) => Promise<void>;
   onReset: () => void;
   isSubmitting: boolean;
   tempTodo: Todo | null;
