@@ -16,7 +16,6 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [filterBy, setFilterBy] = useState(Filter.All);
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
-  const [titleError, setTitleError] = useState<string>('');
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,12 +44,12 @@ export const App: React.FC = () => {
 
   const handleTitleError = (title: string) => {
     if (title.trim() === '') {
-      setTitleError('Title should not be empty');
+      setErrorMessage('Title should not be empty');
       setTimeout(() => {
-        setTitleError('');
+        setErrorMessage('');
       }, 3000);
     } else {
-      setTitleError('');
+      setErrorMessage('');
     }
   };
 
@@ -68,7 +67,7 @@ export const App: React.FC = () => {
 
       setTodos(currentTodos => [...currentTodos, newTodo]);
       setTempTodo(null);
-      setTitleError('');
+      setErrorMessage('');
     } catch (error) {
       setErrorMessage('Unable to add a todo');
       setTimeout(() => {
@@ -105,6 +104,8 @@ export const App: React.FC = () => {
     });
   }
 
+  const showFooter = todos.length > 0;
+
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
@@ -117,16 +118,9 @@ export const App: React.FC = () => {
             onSubmit={addTodo}
             onReset={() => setSelectedTodo(null)}
             isSubmitting={isSubmitting}
-            titleError={titleError}
             tempTodo={tempTodo}
           />
         </header>
-
-        {tempTodo && (
-          <div className="temp-todo">
-            <span>{tempTodo.title}</span>
-          </div>
-        )}
 
         <TodoList
           preparedTodos={preparedTodos}
@@ -138,22 +132,22 @@ export const App: React.FC = () => {
 
         {!errorMessage && (
           <Footer
-            todos={todos}
             errorMessage={errorMessage}
             setFilterBy={setFilterBy}
             filterBy={filterBy}
             todoCount={todoCount}
             completedTodos={completedTodos}
             onClearCompleted={clearCompleted}
+            showFooter={showFooter}
           />
         )}
       </div>
 
       <Notification
-        errorMessage={errorMessage || titleError}
+        errorMessage={errorMessage || errorMessage}
         onClose={() => {
           setErrorMessage('');
-          setTitleError('');
+          setErrorMessage('');
         }}
       />
     </div>

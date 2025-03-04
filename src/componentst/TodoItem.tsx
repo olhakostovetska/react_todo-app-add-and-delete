@@ -17,7 +17,7 @@ export const TodoItem: React.FC<Props> = ({
   selectedTodoId,
 }) => {
   const { id, title, completed } = todo;
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
     setIsLoading(true);
@@ -60,12 +60,10 @@ export const TodoItem: React.FC<Props> = ({
         ×
       </button>
 
-      {isLoading && (
-        <div data-cy="TodoLoader" className="modal overlay">
-          <div className="modal-background has-background-white-ter" />
-          <div className="loader" />
-        </div>
-      )}
+      <div data-cy="TodoLoader" className="modal overlay">
+        <div className="modal-background has-background-white-ter" />
+        <div className="loader" />
+      </div>
     </div>
   );
 };

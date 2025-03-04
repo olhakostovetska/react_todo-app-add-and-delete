@@ -8,7 +8,6 @@ type Props = {
   onSubmit: (todo: Omit<Todo, 'id'>) => void;
   onReset: () => void;
   isSubmitting: boolean;
-  titleError: string;
   tempTodo: Todo | null;
 };
 
@@ -17,7 +16,6 @@ export const TodoForm: React.FC<Props> = ({
   onTitleChange,
   onSubmit,
   isSubmitting,
-  titleError,
   tempTodo,
 }) => {
   const [title, setTitle] = useState<string>('');
@@ -34,6 +32,7 @@ export const TodoForm: React.FC<Props> = ({
     }
 
     onSubmit({ title, completed: false, userId: USER_ID });
+
     setTitle('');
   };
 
@@ -60,7 +59,7 @@ export const TodoForm: React.FC<Props> = ({
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [tempTodo]);
 
   return (
     <>
@@ -88,11 +87,8 @@ export const TodoForm: React.FC<Props> = ({
       {tempTodo && (
         <div className="temp-todo">
           <span>{tempTodo.title}</span>
-          <div className="loader">Loading...</div>
         </div>
       )}
-
-      {titleError && <div className="error">{titleError}</div>}
     </>
   );
 };
