@@ -103,7 +103,6 @@ export const App: React.FC = () => {
           <TodoForm
             todos={todos}
             onSubmit={addTodo}
-            onReset={() => setSelectedTodo(null)}
             isSubmitting={isSubmitting}
             tempTodo={tempTodo}
             setErrorMessage={setErrorMessage}
@@ -111,9 +110,7 @@ export const App: React.FC = () => {
         </header>
 
         <TodoList
-          preparedTodos={
-            tempTodo ? [tempTodo, ...preparedTodos] : preparedTodos
-          }
+          preparedTodos={preparedTodos}
           errorMessage={errorMessage}
           onDelete={deleteTodo}
           onSelect={setSelectedTodo}

@@ -5,7 +5,6 @@ import { USER_ID } from '../api/todos';
 type Props = {
   todos: Todo[];
   onSubmit: (todo: Omit<Todo, 'id'>) => Promise<void>;
-  onReset: () => void;
   isSubmitting: boolean;
   tempTodo: Todo | null;
   setErrorMessage: (message: string) => void;
@@ -19,19 +18,18 @@ export const TodoForm: React.FC<Props> = ({
   setErrorMessage,
 }) => {
   const [title, setTitle] = useState<string>('');
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   const allCompleted = todos.length > 0 && todos.every(todo => todo.completed);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true); // Встановлюємо, що юзер сабмітив форму
 
     if (title.trim() === '') {
       setErrorMessage('Title should not be empty');
-      setTimeout(() => setErrorMessage(''), 3000);
+      setTimeout(() => {
+        setErrorMessage('');
+      }, 3000);
 
       return;
     }
@@ -39,7 +37,7 @@ export const TodoForm: React.FC<Props> = ({
     onSubmit({ title, completed: false, userId: USER_ID })
       .then(() => {
         setTitle('');
-        setIsSubmitted(false); // Скидаємо, бо todo успішно додано
+        setErrorMessage('');
       })
       .catch(() => {});
   };
@@ -51,15 +49,7 @@ export const TodoForm: React.FC<Props> = ({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-
-    setTitle(newTitle);
-
-    if (isSubmitted && newTitle.trim() === '') {
-      setErrorMessage('Title should not be empty');
-    } else {
-      setErrorMessage('');
-    }
+    setTitle(e.target.value);
   };
 
   useEffect(() => {
@@ -91,6 +81,7 @@ export const TodoForm: React.FC<Props> = ({
           disabled={isSubmitting}
         />
       </form>
+
       {tempTodo && (
         <div className="temp-todo">
           <span>{tempTodo.title}</span>
