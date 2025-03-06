@@ -4,36 +4,43 @@ import { USER_ID } from '../api/todos';
 
 type Props = {
   todos: Todo[];
-  onTitleChange: (title: string) => void;
   onSubmit: (todo: Omit<Todo, 'id'>) => Promise<void>;
   onReset: () => void;
   isSubmitting: boolean;
   tempTodo: Todo | null;
+  setErrorMessage: (message: string) => void;
 };
 
 export const TodoForm: React.FC<Props> = ({
   todos,
-  onTitleChange,
   onSubmit,
   isSubmitting,
   tempTodo,
+  setErrorMessage,
 }) => {
   const [title, setTitle] = useState<string>('');
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const allCompleted = todos.length > 0 && todos.every(todo => todo.completed);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitted(true); // Встановлюємо, що юзер сабмітив форму
 
     if (title.trim() === '') {
-      onTitleChange(title);
+      setErrorMessage('Title should not be empty');
+      setTimeout(() => setErrorMessage(''), 3000);
 
       return;
     }
 
     onSubmit({ title, completed: false, userId: USER_ID })
-      .then(() => setTitle(''))
+      .then(() => {
+        setTitle('');
+        setIsSubmitted(false); // Скидаємо, бо todo успішно додано
+      })
       .catch(() => {});
   };
 
@@ -47,7 +54,12 @@ export const TodoForm: React.FC<Props> = ({
     const newTitle = e.target.value;
 
     setTitle(newTitle);
-    onTitleChange(newTitle);
+
+    if (isSubmitted && newTitle.trim() === '') {
+      setErrorMessage('Title should not be empty');
+    } else {
+      setErrorMessage('');
+    }
   };
 
   useEffect(() => {

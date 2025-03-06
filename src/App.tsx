@@ -41,17 +41,6 @@ export const App: React.FC = () => {
     return <UserWarning />;
   }
 
-  const handleTitleError = (title: string) => {
-    if (title.trim() === '') {
-      setErrorMessage('Title should not be empty');
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 3000);
-    } else {
-      setErrorMessage('');
-    }
-  };
-
   async function addTodo(todo: Omit<Todo, 'id'>) {
     setIsSubmitting(true);
     setTempTodo({
@@ -113,11 +102,11 @@ export const App: React.FC = () => {
         <header className="todoapp__header">
           <TodoForm
             todos={todos}
-            onTitleChange={handleTitleError}
             onSubmit={addTodo}
             onReset={() => setSelectedTodo(null)}
             isSubmitting={isSubmitting}
             tempTodo={tempTodo}
+            setErrorMessage={setErrorMessage}
           />
         </header>
 
