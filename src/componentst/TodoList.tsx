@@ -8,6 +8,7 @@ type Props = {
   onDelete: (todoId: number) => Promise<void>;
   onSelect: React.Dispatch<React.SetStateAction<Todo | null>>;
   selectedTodoId: number | undefined;
+  tempTodoId: number | null;
 };
 
 export const TodoList: React.FC<Props> = ({
@@ -16,6 +17,7 @@ export const TodoList: React.FC<Props> = ({
   onDelete,
   onSelect,
   selectedTodoId,
+  tempTodoId,
 }) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
@@ -27,6 +29,7 @@ export const TodoList: React.FC<Props> = ({
           onDelete={onDelete}
           onSelect={onSelect}
           selectedTodoId={selectedTodoId}
+          tempTodoId={tempTodoId}
         />
       ))}
     </section>

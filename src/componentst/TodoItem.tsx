@@ -9,12 +9,14 @@ type Props = {
   onDelete: (todoId: number) => Promise<void>;
   onSelect: React.Dispatch<React.SetStateAction<Todo | null>>;
   selectedTodoId: number | undefined;
+  tempTodoId: number | null;
 };
 
 export const TodoItem: React.FC<Props> = ({
   todo,
   onDelete,
   selectedTodoId,
+  tempTodoId,
 }) => {
   const { id, title, completed } = todo;
   const [, setIsLoading] = useState(false);
@@ -60,7 +62,10 @@ export const TodoItem: React.FC<Props> = ({
         ×
       </button>
 
-      <div data-cy="TodoLoader" className="modal overlay">
+      <div
+        data-cy="TodoLoader"
+        className={cn('modal overlay', { 'is-active': id === tempTodoId })}
+      >
         <div className="modal-background has-background-white-ter" />
         <div className="loader" />
       </div>

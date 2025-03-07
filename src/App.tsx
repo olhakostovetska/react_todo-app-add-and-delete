@@ -115,6 +115,7 @@ export const App: React.FC = () => {
           onDelete={deleteTodo}
           onSelect={setSelectedTodo}
           selectedTodoId={selectedTodo?.id}
+          tempTodoId={tempTodo?.id ?? null}
         />
 
         {!errorMessage && (
