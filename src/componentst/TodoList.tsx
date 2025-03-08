@@ -19,7 +19,9 @@ export const TodoList: React.FC<Props> = ({
   selectedTodoId,
   tempTodo,
 }) => {
-  const todosToRender = tempTodo ? [...preparedTodos, tempTodo] : preparedTodos;
+  const todosToRender = tempTodo
+    ? [...preparedTodos, tempTodo].filter(todo => todo !== null)
+    : preparedTodos;
 
   return (
     <section className="todoapp__main" data-cy="TodoList">

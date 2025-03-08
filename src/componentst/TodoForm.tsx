@@ -7,7 +7,7 @@ type Props = {
   onSubmit: (todo: Omit<Todo, 'id'>) => Promise<void>;
   isSubmitting: boolean;
   tempTodo: Todo | null;
-  setErrorMessage: (message: string) => void;
+  showError: (message: string) => void; // Оновлюємо тип пропсів
 };
 
 export const TodoForm: React.FC<Props> = ({
@@ -15,7 +15,7 @@ export const TodoForm: React.FC<Props> = ({
   onSubmit,
   isSubmitting,
   tempTodo,
-  setErrorMessage,
+  showError, // Отримуємо функцію
 }) => {
   const [title, setTitle] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,23 +25,19 @@ export const TodoForm: React.FC<Props> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const trimmedTitle = title.trim(); // Видаляємо зайві пробіли
+    const trimmedTitle = title.trim();
 
     if (trimmedTitle === '') {
-      setErrorMessage('Title should not be empty');
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 3000);
+      showError('Title should not be empty');
 
       return;
     }
 
-    onSubmit({ title: trimmedTitle, completed: false, userId: USER_ID }) // Передаємо trimmed title
+    onSubmit({ title: trimmedTitle, completed: false, userId: USER_ID })
       .then(() => {
         setTitle('');
-        setErrorMessage('');
       })
-      .catch(() => {});
+      .catch(() => {}); // Помилки обробляються в App.tsx
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -50,14 +46,8 @@ export const TodoForm: React.FC<Props> = ({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-  };
-
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    inputRef.current?.focus();
   }, [tempTodo]);
 
   return (
@@ -78,7 +68,7 @@ export const TodoForm: React.FC<Props> = ({
           className="todoapp__new-todo"
           placeholder="What needs to be done?"
           value={title}
-          onChange={handleChange}
+          onChange={e => setTitle(e.target.value)}
           onKeyDown={handleKeyPress}
           disabled={isSubmitting}
         />

@@ -18,21 +18,25 @@ export const App: React.FC = () => {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const preparedTodos = getPreparedTodos(todos, filterBy);
   const completedTodos = todos.filter(todo => todo.completed);
   const todoCount = todos.length - completedTodos.length;
 
+  // Функція для показу помилки
+  const showError = (message: string) => {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage('');
+    }, 3000);
+  };
+
   const loadTodos = () => {
-    setErrorMessage('');
+    showError(''); // Очищуємо помилки перед запитом
     todoService
       .getTodos()
       .then(setTodos)
-      .catch(() => setErrorMessage('Unable to load todos'))
-      .finally(() => {
-        setTimeout(() => {
-          setErrorMessage('');
-        }, 3000);
-      });
+      .catch(() => showError('Unable to load todos'));
   };
 
   useEffect(loadTodos, []);
@@ -55,12 +59,10 @@ export const App: React.FC = () => {
 
       setTodos(currentTodos => [...currentTodos, newTodo]);
       setTempTodo(null);
-      setErrorMessage('');
+      showError('');
     } catch (error) {
-      setErrorMessage('Unable to add a todo');
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 3000);
+      showError('Unable to add a todo');
+      setTempTodo(null); // Видаляємо тимчасове todo у випадку помилки
     } finally {
       setIsSubmitting(false);
     }
@@ -71,10 +73,7 @@ export const App: React.FC = () => {
       await todoService.deleteTodo(todoId);
       setTodos(currentTodos => currentTodos.filter(todo => todo.id !== todoId));
     } catch {
-      setErrorMessage('Unable to delete a todo');
-      setTimeout(() => {
-        setErrorMessage('');
-      }, 3000);
+      showError('Unable to delete a todo');
     }
   }
 
@@ -84,7 +83,7 @@ export const App: React.FC = () => {
     Promise.all(
       completedTodosIds.map(todoId =>
         todoService.deleteTodo(todoId).catch(() => {
-          setErrorMessage('Unable to delete one or more todos');
+          showError('Unable to delete one or more todos');
         }),
       ),
     ).then(() => {
@@ -105,7 +104,7 @@ export const App: React.FC = () => {
             onSubmit={addTodo}
             isSubmitting={isSubmitting}
             tempTodo={tempTodo}
-            setErrorMessage={setErrorMessage}
+            showError={showError} // Передаємо нову функцію
           />
         </header>
 
@@ -118,15 +117,15 @@ export const App: React.FC = () => {
           tempTodo={tempTodo}
         />
 
-        {!errorMessage && (
+        {showFooter && (
           <Footer
-            errorMessage={errorMessage}
+            errorMessage={errorMessage} // Додаємо errorMessage
             setFilterBy={setFilterBy}
             filterBy={filterBy}
             todoCount={todoCount}
             completedTodos={completedTodos}
             onClearCompleted={clearCompleted}
-            showFooter={showFooter}
+            showFooter={showFooter} // Додаємо showFooter
           />
         )}
       </div>
