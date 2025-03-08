@@ -115,7 +115,7 @@ export const App: React.FC = () => {
           onDelete={deleteTodo}
           onSelect={setSelectedTodo}
           selectedTodoId={selectedTodo?.id}
-          tempTodoId={tempTodo?.id ?? null}
+          tempTodo={tempTodo}
         />
 
         {!errorMessage && (
@@ -132,11 +132,8 @@ export const App: React.FC = () => {
       </div>
 
       <Notification
-        errorMessage={errorMessage || errorMessage}
-        onClose={() => {
-          setErrorMessage('');
-          setErrorMessage('');
-        }}
+        errorMessage={errorMessage}
+        onClose={() => setErrorMessage('')}
       />
     </div>
   );

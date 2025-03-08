@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
 import { Todo } from '../types/Todo';
 import cn from 'classnames';
@@ -16,7 +15,6 @@ export const TodoItem: React.FC<Props> = ({
   todo,
   onDelete,
   selectedTodoId,
-  tempTodoId,
 }) => {
   const { id, title, completed } = todo;
   const [, setIsLoading] = useState(false);
@@ -39,15 +37,14 @@ export const TodoItem: React.FC<Props> = ({
         selected: selectedTodoId === id,
       })}
     >
-      <label className="todo__status-label">
-        <input
-          data-cy="TodoStatus"
-          type="checkbox"
-          className="todo__status"
-          value={id}
-          checked={completed}
-        />
-      </label>
+      {/* Додаємо чекбокс зі статусом */}
+      <input
+        type="checkbox"
+        className="todo__status"
+        data-cy="TodoStatus"
+        checked={completed}
+        readOnly
+      />
 
       <span data-cy="TodoTitle" className="todo__title">
         {title}
@@ -64,7 +61,7 @@ export const TodoItem: React.FC<Props> = ({
 
       <div
         data-cy="TodoLoader"
-        className={cn('modal overlay', { 'is-active': id === tempTodoId })}
+        className={cn('modal overlay', { 'is-active': id === 0 })}
       >
         <div className="modal-background has-background-white-ter" />
         <div className="loader" />

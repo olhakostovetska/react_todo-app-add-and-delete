@@ -8,7 +8,7 @@ type Props = {
   onDelete: (todoId: number) => Promise<void>;
   onSelect: React.Dispatch<React.SetStateAction<Todo | null>>;
   selectedTodoId: number | undefined;
-  tempTodoId: number | null;
+  tempTodo: Todo | null;
 };
 
 export const TodoList: React.FC<Props> = ({
@@ -17,19 +17,21 @@ export const TodoList: React.FC<Props> = ({
   onDelete,
   onSelect,
   selectedTodoId,
-  tempTodoId,
+  tempTodo,
 }) => {
+  const todosToRender = tempTodo ? [...preparedTodos, tempTodo] : preparedTodos;
+
   return (
     <section className="todoapp__main" data-cy="TodoList">
-      {preparedTodos?.map(todo => (
+      {todosToRender.map(todo => (
         <TodoItem
-          key={todo.id}
+          key={todo.id || 'temp'}
           todo={todo}
           errorMessage={errorMessage}
           onDelete={onDelete}
           onSelect={onSelect}
           selectedTodoId={selectedTodoId}
-          tempTodoId={tempTodoId}
+          tempTodoId={tempTodo?.id ?? null}
         />
       ))}
     </section>
