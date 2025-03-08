@@ -25,7 +25,9 @@ export const TodoForm: React.FC<Props> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (title.trim() === '') {
+    const trimmedTitle = title.trim(); // Видаляємо зайві пробіли
+
+    if (trimmedTitle === '') {
       setErrorMessage('Title should not be empty');
       setTimeout(() => {
         setErrorMessage('');
@@ -34,7 +36,7 @@ export const TodoForm: React.FC<Props> = ({
       return;
     }
 
-    onSubmit({ title, completed: false, userId: USER_ID })
+    onSubmit({ title: trimmedTitle, completed: false, userId: USER_ID }) // Передаємо trimmed title
       .then(() => {
         setTitle('');
         setErrorMessage('');

@@ -16,7 +16,7 @@ export const TodoItem: React.FC<Props> = ({
   onDelete,
   selectedTodoId,
 }) => {
-  const { id, title, completed } = todo;
+  const { id, completed } = todo;
   const [, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
@@ -47,7 +47,7 @@ export const TodoItem: React.FC<Props> = ({
       />
 
       <span data-cy="TodoTitle" className="todo__title">
-        {title}
+        {todo.title.trim()}
       </span>
 
       <button
