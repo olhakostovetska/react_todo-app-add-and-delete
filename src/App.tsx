@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable jsx-a11y/control-has-associated-label */
+import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import { getPreparedTodos } from './utils/todoFilter';
 import * as todoService from './api/todos';
@@ -10,34 +12,36 @@ import { TodoForm } from './componentst/TodoForm';
 import { TodoList } from './componentst/TodoList';
 import { Footer } from './componentst/Footer';
 import { Notification } from './componentst/Notification';
+import { TodoItem } from './componentst/TodoItem';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [filterBy, setFilterBy] = useState(Filter.All);
-  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState<number[]>([]);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const preparedTodos = getPreparedTodos(todos, filterBy);
   const completedTodos = todos.filter(todo => todo.completed);
   const todoCount = todos.length - completedTodos.length;
 
-  // Функція для показу помилки
-  const showError = (message: string) => {
-    setErrorMessage(message);
-    setTimeout(() => {
-      setErrorMessage('');
-    }, 3000);
-  };
-
   const loadTodos = () => {
-    showError(''); // Очищуємо помилки перед запитом
+    setErrorMessage('');
     todoService
       .getTodos()
       .then(setTodos)
-      .catch(() => showError('Unable to load todos'));
+      .catch(() => setErrorMessage('Unable to load todos'));
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setErrorMessage('');
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [errorMessage]);
 
   useEffect(loadTodos, []);
 
@@ -45,53 +49,48 @@ export const App: React.FC = () => {
     return <UserWarning />;
   }
 
-  async function addTodo(todo: Omit<Todo, 'id'>) {
-    setIsSubmitting(true);
+  const addTodo = async (todoTitle: string) => {
     setTempTodo({
       id: 0,
-      title: todo.title,
+      title: todoTitle,
       completed: false,
-      userId: todo.userId,
+      userId: todoService.USER_ID,
     });
 
     try {
-      const newTodo = await todoService.addTodo(todo);
+      const newTodo = await todoService.createTodos({
+        title: todoTitle,
+        completed: false,
+      });
 
-      setTodos(currentTodos => [...currentTodos, newTodo]);
-      setTempTodo(null);
-      showError('');
+      setTodos(prev => [...prev, newTodo]);
     } catch (error) {
-      showError('Unable to add a todo');
-      setTempTodo(null); // Видаляємо тимчасове todo у випадку помилки
+      setErrorMessage('Unable to add a todo');
+      inputRef?.current?.focus();
+      throw error;
     } finally {
-      setIsSubmitting(false);
+      setTempTodo(null);
     }
-  }
+  };
 
-  async function deleteTodo(todoId: number): Promise<void> {
+  const onRemoveTodo = async (todoId: number) => {
+    setLoading(prev => [...prev, todoId]);
+
     try {
       await todoService.deleteTodo(todoId);
-      setTodos(currentTodos => currentTodos.filter(todo => todo.id !== todoId));
-    } catch {
-      showError('Unable to delete a todo');
+
+      setTodos(prev => prev.filter(todo => todo.id !== todoId));
+    } catch (error) {
+      setErrorMessage('Unable to delete a todo');
+      inputRef?.current?.focus();
+    } finally {
+      setLoading(prev => prev.filter(id => id !== todoId));
     }
-  }
+  };
 
-  function clearCompleted() {
-    const completedTodosIds = completedTodos.map(todo => todo.id);
-
-    Promise.all(
-      completedTodosIds.map(todoId =>
-        todoService.deleteTodo(todoId).catch(() => {
-          showError('Unable to delete one or more todos');
-        }),
-      ),
-    ).then(() => {
-      setTodos(currentTodos => currentTodos.filter(todo => !todo.completed));
-    });
-  }
-
-  const showFooter = todos.length > 0;
+  const onClearTodo = async () => {
+    completedTodos.forEach(todo => onRemoveTodo(todo.id));
+  };
 
   return (
     <div className="todoapp">
@@ -101,31 +100,37 @@ export const App: React.FC = () => {
         <header className="todoapp__header">
           <TodoForm
             todos={todos}
-            onSubmit={addTodo}
-            isSubmitting={isSubmitting}
-            tempTodo={tempTodo}
-            showError={showError} // Передаємо нову функцію
+            setErrorMessage={setErrorMessage}
+            onAddTodo={addTodo}
+            inputRef={inputRef}
+            todosLength={todos.length}
+            isTitleDisabled={!!tempTodo}
           />
         </header>
 
         <TodoList
           preparedTodos={preparedTodos}
           errorMessage={errorMessage}
-          onDelete={deleteTodo}
-          onSelect={setSelectedTodo}
-          selectedTodoId={selectedTodo?.id}
-          tempTodo={tempTodo}
+          loading={loading}
+          onRemoveTodo={onRemoveTodo}
         />
+        {tempTodo && (
+          <TodoItem
+            todo={tempTodo}
+            onRemoveTodo={onRemoveTodo}
+            loading
+            errorMessage={''}
+          />
+        )}
 
-        {showFooter && (
+        {!errorMessage && (
           <Footer
-            errorMessage={errorMessage} // Додаємо errorMessage
+            todos={todos}
+            errorMessage={errorMessage}
             setFilterBy={setFilterBy}
             filterBy={filterBy}
             todoCount={todoCount}
-            completedTodos={completedTodos}
-            onClearCompleted={clearCompleted}
-            showFooter={showFooter} // Додаємо showFooter
+            onClearTodo={onClearTodo}
           />
         )}
       </div>

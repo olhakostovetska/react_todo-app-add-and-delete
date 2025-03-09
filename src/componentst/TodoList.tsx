@@ -3,37 +3,27 @@ import { Todo } from '../types/Todo';
 import { TodoItem } from './TodoItem';
 
 type Props = {
-  preparedTodos: Todo[];
+  preparedTodos: Todo[] | null;
   errorMessage: string;
-  onDelete: (todoId: number) => Promise<void>;
-  onSelect: React.Dispatch<React.SetStateAction<Todo | null>>;
-  selectedTodoId: number | undefined;
-  tempTodo: Todo | null;
+  loading: number[];
+  onRemoveTodo: (id: number) => Promise<void>;
 };
 
 export const TodoList: React.FC<Props> = ({
   preparedTodos,
   errorMessage,
-  onDelete,
-  onSelect,
-  selectedTodoId,
-  tempTodo,
+  loading,
+  onRemoveTodo,
 }) => {
-  const todosToRender = tempTodo
-    ? [...preparedTodos, tempTodo].filter(todo => todo !== null)
-    : preparedTodos;
-
   return (
     <section className="todoapp__main" data-cy="TodoList">
-      {todosToRender.map(todo => (
+      {preparedTodos?.map(todo => (
         <TodoItem
-          key={todo.id || 'temp'}
+          key={todo.id}
           todo={todo}
           errorMessage={errorMessage}
-          onDelete={onDelete}
-          onSelect={onSelect}
-          selectedTodoId={selectedTodoId}
-          tempTodoId={tempTodo?.id ?? null}
+          loading={loading.includes(todo.id)}
+          onRemoveTodo={onRemoveTodo}
         />
       ))}
     </section>

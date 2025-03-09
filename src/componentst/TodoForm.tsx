@@ -1,66 +1,61 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Todo } from '../types/Todo';
-import { USER_ID } from '../api/todos';
 
 type Props = {
   todos: Todo[];
-  onSubmit: (todo: Omit<Todo, 'id'>) => Promise<void>;
-  isSubmitting: boolean;
-  tempTodo: Todo | null;
-  showError: (message: string) => void; // Оновлюємо тип пропсів
+  setErrorMessage: (message: string) => void;
+  onAddTodo: (value: string) => Promise<void>;
+  inputRef: React.RefObject<HTMLInputElement> | null;
+  todosLength: number;
+  isTitleDisabled: boolean;
 };
 
 export const TodoForm: React.FC<Props> = ({
   todos,
-  onSubmit,
-  isSubmitting,
-  tempTodo,
-  showError, // Отримуємо функцію
+  setErrorMessage,
+  onAddTodo,
+  inputRef,
+  todosLength,
+  isTitleDisabled,
 }) => {
   const [title, setTitle] = useState<string>('');
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const allCompleted = todos.length > 0 && todos.every(todo => todo.completed);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const trimmedTitle = title.trim();
-
-    if (trimmedTitle === '') {
-      showError('Title should not be empty');
+    if (title.trim() === '') {
+      setErrorMessage('Title should not be empty');
 
       return;
     }
 
-    onSubmit({ title: trimmedTitle, completed: false, userId: USER_ID })
-      .then(() => {
-        setTitle('');
-      })
-      .catch(() => {}); // Помилки обробляються в App.tsx
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSubmit(e);
-    }
+    try {
+      await onAddTodo(title.trim());
+      setTitle('');
+    } catch (error) {}
   };
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, [tempTodo]);
+    inputRef?.current?.focus();
+  }, [todosLength, inputRef]);
+
+  useEffect(() => {
+    if (!isTitleDisabled) {
+      inputRef?.current?.focus();
+    }
+  }, [isTitleDisabled, inputRef]);
 
   return (
     <>
       {todos.length > 0 && (
         <button
           type="button"
-          className={`todoapp__toggle-all ${allCompleted ? 'active' : ''}`}
+          className="todoapp__toggle-all active"
           data-cy="ToggleAllButton"
         />
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={onSubmit}>
         <input
           ref={inputRef}
           data-cy="NewTodoField"
@@ -69,16 +64,9 @@ export const TodoForm: React.FC<Props> = ({
           placeholder="What needs to be done?"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          onKeyDown={handleKeyPress}
-          disabled={isSubmitting}
+          disabled={isTitleDisabled}
         />
       </form>
-
-      {tempTodo && (
-        <div className="temp-todo">
-          <span>{tempTodo.title}</span>
-        </div>
-      )}
     </>
   );
 };
